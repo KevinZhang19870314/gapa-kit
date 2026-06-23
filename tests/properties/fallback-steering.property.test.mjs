@@ -19,12 +19,12 @@ const SUPPORTED_IDES = getSupportedIDEs()
 
 /**
  * Extract the prompt text from a Kiro hook JSON file content.
- * The hook JSON has structure: { then: { prompt: "..." } }
+ * The hook JSON has structure: { version: "v1", hooks: [{ action: { prompt: "..." } }] }
  * The prompt value has escaped newlines (\\n) that need to be unescaped.
  */
 function extractHookPrompt(hookContent) {
   const parsed = JSON.parse(hookContent)
-  return parsed.then.prompt
+  return parsed.hooks[0].action.prompt
 }
 
 /**

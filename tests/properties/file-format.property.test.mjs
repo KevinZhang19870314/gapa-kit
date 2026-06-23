@@ -2,7 +2,7 @@
  * Property 6: Kiro hook 文件格式有效性
  *
  * 对于任意语言设置，KiroAdapter.generateHooks() 输出的每个文件应是有效 JSON，
- * 且包含 enabled、name、description、version、when.type、then.type、then.prompt 字段。
+ * 且包含 version: "v1"、hooks 数组，每个 hook 包含 name、trigger、action.type、action.prompt 字段。
  *
  * Feature: cross-ide-gapa-kit, Property 6: Kiro hook 文件格式有效性
  *
@@ -57,43 +57,40 @@ describe('Property 6: Kiro hook 文件格式有效性', () => {
               )
             }
 
-            // Required fields: enabled, name, description, version
-            if (typeof parsed.enabled !== 'boolean') {
+            // Required top-level fields: version, hooks
+            if (parsed.version !== 'v1') {
               throw new Error(
-                `Hook file ${file.relativePath} missing or invalid "enabled" field (expected boolean)`
+                `Hook file ${file.relativePath} missing or invalid "version" field (expected "v1")`
               )
             }
-            if (typeof parsed.name !== 'string' || !parsed.name) {
+            if (!Array.isArray(parsed.hooks) || parsed.hooks.length === 0) {
               throw new Error(
-                `Hook file ${file.relativePath} missing or empty "name" field`
-              )
-            }
-            if (typeof parsed.description !== 'string' || !parsed.description) {
-              throw new Error(
-                `Hook file ${file.relativePath} missing or empty "description" field`
-              )
-            }
-            if (parsed.version === undefined || parsed.version === null) {
-              throw new Error(
-                `Hook file ${file.relativePath} missing "version" field`
+                `Hook file ${file.relativePath} missing or empty "hooks" array`
               )
             }
 
-            // Required nested fields: when.type, then.type, then.prompt
-            if (!parsed.when || typeof parsed.when.type !== 'string' || !parsed.when.type) {
-              throw new Error(
-                `Hook file ${file.relativePath} missing or invalid "when.type" field`
-              )
-            }
-            if (!parsed.then || typeof parsed.then.type !== 'string' || !parsed.then.type) {
-              throw new Error(
-                `Hook file ${file.relativePath} missing or invalid "then.type" field`
-              )
-            }
-            if (typeof parsed.then.prompt !== 'string' || !parsed.then.prompt) {
-              throw new Error(
-                `Hook file ${file.relativePath} missing or empty "then.prompt" field`
-              )
+            // Each hook entry: name, trigger, action.type, action.prompt
+            for (const hook of parsed.hooks) {
+              if (typeof hook.name !== 'string' || !hook.name) {
+                throw new Error(
+                  `Hook file ${file.relativePath} hook entry missing or empty "name" field`
+                )
+              }
+              if (typeof hook.trigger !== 'string' || !hook.trigger) {
+                throw new Error(
+                  `Hook file ${file.relativePath} hook entry missing or empty "trigger" field`
+                )
+              }
+              if (!hook.action || typeof hook.action.type !== 'string' || !hook.action.type) {
+                throw new Error(
+                  `Hook file ${file.relativePath} hook entry missing or invalid "action.type" field`
+                )
+              }
+              if (typeof hook.action.prompt !== 'string' || !hook.action.prompt) {
+                throw new Error(
+                  `Hook file ${file.relativePath} hook entry missing or empty "action.prompt" field`
+                )
+              }
             }
           }
         },

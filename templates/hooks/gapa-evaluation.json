@@ -1,0 +1,13 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "GAPA Post-Task Evaluation",
+      "trigger": "Stop",
+      "action": {
+        "type": "agent",
+        "prompt": "刚才的任务已完成。现在执行 GAPA 评估流程（如果刚才是简单问答或闲聊，跳过整个流程）：\n\n先读取 .kiro/steering/gapa.md 获取评估规则，然后：\n\n1. **任务评估：** 按 gapa.md 中的 5 个维度评估，将结果追加到 gapa-memory.md（包含「提炼 skill」和「偏好更新」字段）\n2. **工作流提炼：** 如果本次任务的工作流有复用价值，提炼为 .kiro/skills/{name}.md\n3. **偏好更新：** 如果观察到新的用户偏好或习惯，更新 gapa-preferences.md\n\n评估要诚实具体，行动项要可执行，skill 提炼要克制。"
+      }
+    }
+  ]
+}

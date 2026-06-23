@@ -1,13 +1,13 @@
 {
-  "enabled": true,
-  "name": "{{slot:hookName}}",
-  "description": "{{slot:hookDescription}}",
-  "version": "1",
-  "when": {
-    "type": "{{slot:triggerType}}"
-  },
-  "then": {
-    "type": "askAgent",
-    "prompt": "{{slot:prompt}}"
-  }
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "{{slot:hookName}}",
+      "trigger": "{{slot:triggerType}}",
+      "action": {
+        "type": "agent",
+        "prompt": "{{slot:prompt}}"
+      }
+    }
+  ]
 }

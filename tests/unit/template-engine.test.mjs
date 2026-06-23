@@ -193,17 +193,16 @@ describe('injectIntoWrapper', () => {
     const wrapper = loadAdapterTemplate('kiro', 'hook.tpl')
     const result = injectIntoWrapper(wrapper, {
       hookName: 'gapa-context-load',
-      hookDescription: 'Load GAPA context',
-      triggerType: 'promptSubmit',
+      triggerType: 'UserPromptSubmit',
       prompt: 'Load memory and preferences',
     })
     expect(result).toContain('"name": "gapa-context-load"')
-    expect(result).toContain('"type": "promptSubmit"')
+    expect(result).toContain('"trigger": "UserPromptSubmit"')
     // Should be valid JSON
     const parsed = JSON.parse(result)
-    expect(parsed.enabled).toBe(true)
-    expect(parsed.name).toBe('gapa-context-load')
-    expect(parsed.then.type).toBe('askAgent')
+    expect(parsed.version).toBe('v1')
+    expect(parsed.hooks[0].name).toBe('gapa-context-load')
+    expect(parsed.hooks[0].action.type).toBe('agent')
     expect(result).not.toContain('{{slot:')
   })
 
@@ -244,7 +243,7 @@ describe('loadAdapterTemplate', () => {
   it('loads kiro hook template', () => {
     const tpl = loadAdapterTemplate('kiro', 'hook.tpl')
     expect(tpl).toContain('{{slot:hookName}}')
-    expect(tpl).toContain('"enabled": true')
+    expect(tpl).toContain('"version": "v1"')
   })
 
   it('loads cursor mdc-wrapper template', () => {

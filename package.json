@@ -1,6 +1,6 @@
 {
   "name": "gapa-kit",
-  "version": "0.5.4",
+  "version": "0.6.1",
   "description": "GAPA — Generalized Action and Prompt Adaptation. A cross-IDE self-learning framework for AI Agents. Supports Kiro, Cursor, Claude Code, VS Code (Copilot), Windsurf, and TRAE.",
   "keywords": [
     "ai",
@@ -29,7 +29,8 @@
   },
   "type": "module",
   "bin": {
-    "gapa": "./bin/gapa.mjs"
+    "gapa": "./bin/gapa.mjs",
+    "gapa-kit": "./bin/gapa.mjs"
   },
   "files": [
     "bin/",

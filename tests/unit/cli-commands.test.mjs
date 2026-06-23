@@ -109,8 +109,8 @@ describe('CLI — init command', () => {
     // Kiro-specific files
     expect(existsSync(resolve(tmpDir, '.kiro/steering/gapa.md'))).toBe(true)
     expect(existsSync(resolve(tmpDir, '.kiro/steering/gapa-preferences.md'))).toBe(true)
-    expect(existsSync(resolve(tmpDir, '.kiro/hooks/gapa-context-load.kiro.hook'))).toBe(true)
-    expect(existsSync(resolve(tmpDir, '.kiro/hooks/gapa-evaluation.kiro.hook'))).toBe(true)
+    expect(existsSync(resolve(tmpDir, '.kiro/hooks/gapa-context-load.json'))).toBe(true)
+    expect(existsSync(resolve(tmpDir, '.kiro/hooks/gapa-evaluation.json'))).toBe(true)
 
     // .gaparc.json should contain kiro adapter info
     const config = JSON.parse(readFileSync(resolve(tmpDir, '.gapa/.gaparc.json'), 'utf-8'))

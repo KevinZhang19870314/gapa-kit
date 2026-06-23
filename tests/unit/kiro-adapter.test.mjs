@@ -107,8 +107,8 @@ describe('KiroAdapter.generateHooks()', () => {
   it('generates correct file paths', () => {
     const files = adapter.generateHooks(makeCtx())
     const paths = files.map((f) => f.relativePath)
-    expect(paths).toContain('.kiro/hooks/gapa-context-load.kiro.hook')
-    expect(paths).toContain('.kiro/hooks/gapa-evaluation.kiro.hook')
+    expect(paths).toContain('.kiro/hooks/gapa-context-load.json')
+    expect(paths).toContain('.kiro/hooks/gapa-evaluation.json')
   })
 
   it('hook files are valid JSON', () => {
@@ -122,34 +122,36 @@ describe('KiroAdapter.generateHooks()', () => {
     const files = adapter.generateHooks(makeCtx())
     for (const file of files) {
       const parsed = JSON.parse(file.content)
-      expect(parsed).toHaveProperty('enabled', true)
-      expect(parsed).toHaveProperty('name')
-      expect(parsed).toHaveProperty('description')
-      expect(parsed).toHaveProperty('version')
-      expect(parsed).toHaveProperty('when.type')
-      expect(parsed).toHaveProperty('then.type', 'askAgent')
-      expect(parsed).toHaveProperty('then.prompt')
-      expect(typeof parsed.then.prompt).toBe('string')
-      expect(parsed.then.prompt.length).toBeGreaterThan(0)
+      expect(parsed).toHaveProperty('version', 'v1')
+      expect(parsed).toHaveProperty('hooks')
+      expect(parsed.hooks).toBeInstanceOf(Array)
+      expect(parsed.hooks).toHaveLength(1)
+      const hook = parsed.hooks[0]
+      expect(hook).toHaveProperty('name')
+      expect(hook).toHaveProperty('trigger')
+      expect(hook).toHaveProperty('action.type', 'agent')
+      expect(hook).toHaveProperty('action.prompt')
+      expect(typeof hook.action.prompt).toBe('string')
+      expect(hook.action.prompt.length).toBeGreaterThan(0)
     }
   })
 
-  it('context-load hook uses promptSubmit trigger', () => {
+  it('context-load hook uses UserPromptSubmit trigger', () => {
     const files = adapter.generateHooks(makeCtx())
     const ctxHook = files.find((f) =>
       f.relativePath.includes('context-load')
     )
     const parsed = JSON.parse(ctxHook.content)
-    expect(parsed.when.type).toBe('promptSubmit')
+    expect(parsed.hooks[0].trigger).toBe('UserPromptSubmit')
   })
 
-  it('evaluation hook uses agentStop trigger', () => {
+  it('evaluation hook uses Stop trigger', () => {
     const files = adapter.generateHooks(makeCtx())
     const evalHook = files.find((f) =>
       f.relativePath.includes('evaluation')
     )
     const parsed = JSON.parse(evalHook.content)
-    expect(parsed.when.type).toBe('agentStop')
+    expect(parsed.hooks[0].trigger).toBe('Stop')
   })
 
   it('works with en language', () => {
@@ -157,9 +159,9 @@ describe('KiroAdapter.generateHooks()', () => {
     expect(files).toHaveLength(2)
     for (const file of files) {
       const parsed = JSON.parse(file.content)
-      expect(parsed.enabled).toBe(true)
-      expect(parsed.when.type).toBeTruthy()
-      expect(parsed.then.prompt).toBeTruthy()
+      expect(parsed.version).toBe('v1')
+      expect(parsed.hooks[0].trigger).toBeTruthy()
+      expect(parsed.hooks[0].action.prompt).toBeTruthy()
     }
   })
 })
@@ -214,8 +216,8 @@ describe('KiroAdapter.getInstalledFiles()', () => {
     const paths = files.map((f) => f.relativePath)
     expect(paths).toContain('.kiro/steering/gapa.md')
     expect(paths).toContain('.kiro/steering/gapa-preferences.md')
-    expect(paths).toContain('.kiro/hooks/gapa-context-load.kiro.hook')
-    expect(paths).toContain('.kiro/hooks/gapa-evaluation.kiro.hook')
+    expect(paths).toContain('.kiro/hooks/gapa-context-load.json')
+    expect(paths).toContain('.kiro/hooks/gapa-evaluation.json')
   })
 
   it('each file has exists and label properties', () => {
@@ -239,10 +241,10 @@ describe('KiroAdapter.getInstalledFiles()', () => {
 // ─── Backward compatibility (Requirement 3.4) ───
 
 describe('KiroAdapter backward compatibility', () => {
-  it('hook file paths match v0.1.0 convention (.kiro/hooks/*.kiro.hook)', () => {
+  it('hook file paths use .kiro/hooks/*.json convention', () => {
     const files = adapter.generateHooks(makeCtx())
     for (const file of files) {
-      expect(file.relativePath).toMatch(/^\.kiro\/hooks\/.*\.kiro\.hook$/)
+      expect(file.relativePath).toMatch(/^\.kiro\/hooks\/.*\.json$/)
     }
   })
 
@@ -253,18 +255,23 @@ describe('KiroAdapter backward compatibility', () => {
     }
   })
 
-  it('hook JSON structure matches Kiro expected format', () => {
+  it('hook JSON structure matches Kiro v1 format', () => {
     const files = adapter.generateHooks(makeCtx())
     for (const file of files) {
       const parsed = JSON.parse(file.content)
-      // Kiro expects exactly these top-level keys
+      // Kiro v1 expects these top-level keys
       expect(Object.keys(parsed)).toEqual(
-        expect.arrayContaining(['enabled', 'name', 'description', 'version', 'when', 'then'])
+        expect.arrayContaining(['version', 'hooks'])
       )
-      // when must have type
-      expect(Object.keys(parsed.when)).toContain('type')
-      // then must have type and prompt
-      expect(Object.keys(parsed.then)).toEqual(
+      expect(parsed.version).toBe('v1')
+      expect(parsed.hooks).toBeInstanceOf(Array)
+      // Each hook entry must have name, trigger, action
+      const hook = parsed.hooks[0]
+      expect(Object.keys(hook)).toEqual(
+        expect.arrayContaining(['name', 'trigger', 'action'])
+      )
+      // action must have type and prompt
+      expect(Object.keys(hook.action)).toEqual(
         expect.arrayContaining(['type', 'prompt'])
       )
     }
